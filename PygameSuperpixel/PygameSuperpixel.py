@@ -1,12 +1,14 @@
-try:
-    import pygame
-except:
-    raise Exception('Pygame is not installed! Run \'pip install pygame\'')
-try:
-    import numpy as np
-except:
-    raise Exception('Numpy is not installed! Run \'pip install numpy\'')
+#try:
+#    import pygame
+#except:
+#    raise Exception('Pygame is not installed! Run \'pip install pygame\'')
+#try:
+#    import numpy as np
+#except:
+#    raise Exception('Numpy is not installed! Run \'pip install numpy\'')
 
+import pygame
+import numpy as np
 from typing import Tuple
 from abc import ABCMeta, abstractmethod
 

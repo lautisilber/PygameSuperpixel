@@ -7,5 +7,5 @@ setup(
     description='Easy use of pygame to create graphical grids of pixels',
     author='Lautaro Silbergleit',
     license='MIT',
-    install_requires=['numpy']
+    install_requires=['pygame', 'numpy']
 )
