@@ -136,9 +136,8 @@ class Superpixel(metaclass=ABCMeta):
 
     def get_mouse_grid(self):
         (x_raw, y_raw) = self.get_mouse_pos()
-        shape = self.get_grid_shape()
-        x = int(shape[0] * (x_raw / self.resolution[0]))
-        y = int(shape[1] * (y_raw / self.resolution[1]))
+        x = int(self.superpixel_grid_shape[0] * (x_raw / self.resolution[0]))
+        y = int(self.superpixel_grid_shape[1] * (y_raw / self.resolution[1]))
         return (x, y)
 
     def update_screen(self):
