@@ -1,11 +1,6 @@
-#try:
-#    import pygame
-#except:
-#    raise Exception('Pygame is not installed! Run \'pip install pygame\'')
-#try:
-#    import numpy as np
-#except:
-#    raise Exception('Numpy is not installed! Run \'pip install numpy\'')
+#
+#    By Lautaro Silbergleit - 2020
+#
 
 import pygame
 import numpy as np
@@ -21,7 +16,6 @@ class Superpixel(metaclass=ABCMeta):
             in the grid is a 'superpixel'. It should be inhereted by a class and the method 'loop()' needs
             to be implemented by the child class. The loop is initiated by callong the begin() method.
             Superpixels can be drawn by calling draw_pixel()
-
             :param x: width in pixels of the window
             :param y: height in pixels of the window
             :param pixels_x: how many superpixels per row
@@ -68,10 +62,13 @@ class Superpixel(metaclass=ABCMeta):
         # pygame init
         self.fps = fps
         self.running = False
+        self.resolution = (x, y)
         pygame.init()
-        self.screen = pygame.display.set_mode((x, y))
+        self.screen = pygame.display.set_mode(self.resolution)
         self.clock = pygame.time.Clock()
         pygame.display.set_caption(self.window_title)
+
+        self.events = None
 
     def get_grid_shape(self):
         '''
@@ -79,16 +76,25 @@ class Superpixel(metaclass=ABCMeta):
         '''
         return self.superpixel_grid_shape
 
+    def get_tile_abs_center_pos(self, x: int, y: int):
+        '''
+            Get the center of a tile in Superpixel grid in absolute pixels
+            :param x: x position in superpixel grid
+            :param y: y position in superpixel grid
+            :return: (x_pixels, y_pixels)
+        '''
+        pixel_x = self.square_pos[x, y][0] + self.square_size[0]//2
+        pixel_y = self.square_pos[x, y][1] + self.square_size[1]//2
+        return (pixel_x, pixel_y)
+
     def draw_pixel(self, x: int, y: int, colour: Colour, size: float=1) -> None: #draws a superpixel of colour colour and position (x, y)
         '''
             Draw a superpixel
-
             :param x: x position in superpixel grid
             :param y: y position in superpixel grid
             :param colour: (r, g, b) tuple with rgb pixel colour values
             :param size: float between 0 - 1 that determines the percentage of the grid square the superpixel will fill
         '''
-
         rect = pygame.Rect(self.square_pos[x, y][0], self.square_pos[x, y][1], self.square_size[0], self.square_size[1])
         if size != 1:
             size = np.interp(np.clip(size, 0, 1), (0, 1), (-self.square_size[0], 0))
@@ -98,13 +104,11 @@ class Superpixel(metaclass=ABCMeta):
     def draw_region(self, up_left: Tuple[int, int], width_height: Tuple[int, int], colour: Colour, size: float=1) -> None:
         '''
             Draw a rectangular region that fits in multiple grid squares
-
             :param up_left: (x, y) grid coordinates of up left corner
             :param width_height: (x, y) width and height in superpixels the region will occupy
             :param colour: (r, g, b) tuple with rgb pixel colour values
             :param size: float between 0 - 1 that determines the percentage of the space the region will fill
         '''
-
         rect = pygame.Rect(self.square_pos[up_left[0], up_left[1]][0], self.square_pos[up_left[0], up_left[1]][1], width_height[0]*self.square_size[0], width_height[1]*self.square_size[1])
         if size != 1:
             size = np.interp(np.clip(size, 0, 1), (0, 1), (-self.square_size[0], 0))
@@ -114,16 +118,28 @@ class Superpixel(metaclass=ABCMeta):
     def fill(self, colour: Colour=(0, 0, 0)):
         '''
             Fills entire screen with one colour
-
             :param colour: (r, g, b) tuple with rgb pixel colour values
         '''
         self.screen.fill(colour)
 
     def get_events(self):
         '''
-            :return: pygame.eventsl list
+            :return: pygame.event list
         '''
         return pygame.event.get()
+
+    def get_mouse_pos(self):
+        '''
+            :return: mouse position
+        '''
+        return pygame.mouse.get_pos()
+
+    def get_mouse_grid(self):
+        (x_raw, y_raw) = self.get_mouse_pos()
+        shape = self.get_grid_shape()
+        x = 0 if x_raw <= 0 else int(shape[0] * (x_raw / self.resolution[0]))
+        y = 0 if y_raw <= 0 else int(shape[1] * (y_raw / self.resolution[1]))
+        return (x, y)
 
     def update_screen(self):
         '''
@@ -151,7 +167,8 @@ class Superpixel(metaclass=ABCMeta):
         '''
         self.running = True
         while self.running:
-            for event in pygame.event.get():
+            self.events = pygame.event.get()
+            for event in self.events:
                 if event.type == pygame.QUIT:
                     self.running = False
 
@@ -191,7 +208,6 @@ if __name__ == '__main__':
 
         def loop(self):
             pass
-            #return super().loop()
 
     g = MyClass(827, 643, 10)
     g.begin()
